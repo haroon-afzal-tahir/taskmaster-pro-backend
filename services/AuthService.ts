@@ -23,7 +23,12 @@ export class AuthService {
       await newUser.save();
 
       // JWT token
-      const token = jwt.sign(payload, process.env.JWT_SECRET as string, { expiresIn: "1d" });
+      const token = jwt.sign({
+        email: payload.email,
+        name: payload.name,
+        username: payload.username,
+        id: newUser._id,
+      }, process.env.JWT_SECRET as string, { expiresIn: "1d" });
 
       return token;
 
@@ -78,6 +83,18 @@ export class AuthService {
       if (latestOtp.otp !== otp) throw new Error("Invalid OTP");
 
       return;
+    } catch (error) {
+      throw new Error((error as Error).message);
+    }
+  }
+
+  public static async updatePassword(email: string, password: string) {
+    try {
+      // Hashed password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Update password
+      await User.updateOne({ email }, { password: hashedPassword });
     } catch (error) {
       throw new Error((error as Error).message);
     }

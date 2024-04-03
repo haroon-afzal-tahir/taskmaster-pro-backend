@@ -1,13 +1,23 @@
-import mongoose from "mongoose";
-import type { ObjectId } from "mongoose";
+import mongoose, { Model, Schema } from "mongoose";
+import { ObjectId } from "mongoose";
+import { ITask } from "../types";
 
-const taskSchema = new mongoose.Schema({
+interface TaskModel extends Model<ITask> {
+  getAll(): Promise<ITask[]>;
+}
+
+const taskSchema = new mongoose.Schema<ITask, TaskModel>({
   title: { type: String, required: true },
   dueDate: { type: Date, required: true },
-  completed: { type: Boolean, required: true },
+  completed: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
-  tagId: { type: Object, required: true },
+  tag: { type: Schema.Types.ObjectId, required: true, ref: "Tag" },
+  user: { type: Schema.Types.ObjectId, required: true, ref: "User" },
 });
+
+taskSchema.statics.getAll = function () {
+  return Task.find().populate("tag").populate("user");
+}
 
 taskSchema.set("toJSON", {
   transform: (doc, ret) => {
@@ -16,6 +26,6 @@ taskSchema.set("toJSON", {
   }
 });
 
-const Task = mongoose.model("Task", taskSchema);
+const Task = mongoose.model<ITask, TaskModel>("Task", taskSchema);
 
 export default Task;
