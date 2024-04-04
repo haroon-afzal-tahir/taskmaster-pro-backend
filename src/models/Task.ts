@@ -20,7 +20,7 @@ taskSchema.statics.getAll = function () {
 }
 
 taskSchema.statics.getTasksByTagId = function (tagId: string) {
-  return Task.find().populate("tag").populate("user");
+  return Task.find({ tag: tagId }).populate("tag").populate("user");
 }
 
 taskSchema.set("toJSON", {
