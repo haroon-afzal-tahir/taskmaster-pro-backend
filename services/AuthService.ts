@@ -19,55 +19,21 @@ export class AuthService {
       const hashedPassword = await bcrypt.hash(payload.password, 10);
       payload.password = hashedPassword;
 
-      let token = "";
       // User creation
-      await User.register(new User(payload), payload.password, (err, user) => {
-        if (err) {
-          throw new Error(err.message);
-        } else {
-          // JWT token
-          token = jwt.sign({
-            email: payload.email,
-            name: payload.name,
-            username: payload.username,
-            id: user._id,
-          }, process.env.JWT_SECRET as string, { expiresIn: "1d" });
-        }
-      });
-
-      return token;
-    } catch (error) {
-      throw new Error((error as Error).message);
-    }
-  }
-
-  public static async login(payload: IUser) {
-    try {
-      const { email, password } = payload;
-
-      if (!email || !password) throw new Error("Invalid credentials");
-
-      const user = await User.findOne({ email });
-      
-      if (!user) throw new Error("User not found");
-
-      const id_token = passport.authenticate("local", (err: { message: string | undefined; }, user: { _id: string; username: string; email: string }, info: any) => {
-        if (err) {
-          throw new Error(err.message);
-        }
-        if (!user) {
-          throw new Error("Invalid credentials");
-        }
-        const token = jwt.sign({ userId: user._id, username: user.username, email: user.email }, process.env.JWT_SECRET!, { expiresIn: "24h" });
-        return token;
-      })
-
-      const isMatch = await bcrypt.compare(password, user.password);
-
-      if (!isMatch) throw new Error("Invalid credentials");
+      const newUser = await User.register(new User({
+        name: payload.name,
+        username: payload.username,
+        email: payload.email,
+        password: hashedPassword,
+      }), hashedPassword);
 
       // JWT token
-      const token = jwt.sign(payload, process.env.JWT_SECRET as string, { expiresIn: "1d" });
+      const token = jwt.sign({
+        id: newUser._id,
+        username: newUser.username,
+        email: newUser.email,
+        name: newUser.name,
+      }, process.env.JWT_SECRET!, { expiresIn: "1d" });
 
       return token;
     } catch (error) {
@@ -110,10 +76,31 @@ export class AuthService {
       // Hashed password
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Update password
+      // Get user by email
+      const user = await User.findOne({ email });
+
+      if (!user) throw new Error("User not found");
+
       await User.updateOne({ email }, { password: hashedPassword });
+
+
+      // Update password
+      user.setPassword(hashedPassword, (err: { message: string | undefined; }, user: { save: () => void; }) => {
+        if (err) throw new Error(err.message);
+        console.log(user);
+        user.save();
+      })
     } catch (error) {
       throw new Error((error as Error).message);
     }
+  }
+
+  public static generateToken(user: IUser & { _id: string }) {
+    return jwt.sign({
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      name: user.name,
+    }, process.env.JWT_SECRET!, { expiresIn: "1d" });
   }
 }

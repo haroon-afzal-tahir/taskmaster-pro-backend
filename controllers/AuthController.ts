@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { IUser } from "../types";
 import { AuthService } from "../services";
 import { logger } from "../config/winston";
+import { passport } from '../config/passport';
+import { info } from "winston";
 
 export class AuthController {
   public static async register(req: Request, res: Response) {
@@ -25,12 +27,30 @@ export class AuthController {
   public static async login(req: Request, res: Response) {
     try {
       const user = req.body as IUser;
-      const token = await AuthService.login(user);
+      if (!user || !user.email || !user.password) {
+        logger.error("User data not found");
+        return res.status(400).json({ message: "User data not found" });
+      }
 
-      // Send token in response cookie
-      res.cookie("id_token", token, { httpOnly: true, sameSite: 'none', secure: true, });
+      passport.authenticate("local", { session: false }, (err: { message: any; }, user: IUser & { _id: string; }, info: { message: any; }) => {
+        if (err) {
+          logger.error(err.message);
+          return res.status(500).json({ message: err.message });
+        }
+        if (!user) {
+          logger.error(info.message);
+          return res.status(401).json({ message: info.message });
+        }
 
-      return res.status(200).json({ message: "User login successfully", token });
+        // JWT token
+        const token = AuthService.generateToken(user);
+
+        // Send token in response cookie
+        res.cookie("id_token", token, { httpOnly: true, sameSite: 'none', secure: true, });
+
+        return res.status(200).json({ message: "User logged in successfully", token });
+      })(req, res);
+
     } catch (error) {
       return res.status(500).json({ message: (error as Error).message });
     }
