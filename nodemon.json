@@ -8,5 +8,5 @@
       "out/logs/*",
       "tests/*"
   ],
-  "exec": "ts-node --transpile-only index.ts"
+  "exec": "ts-node --transpile-only api/index.ts"
 }

@@ -4,10 +4,10 @@ import cors from "cors";
 import flash from "express-flash";
 import session from "express-session";
 
-import { Auth, Task, Tag } from "./routes";
-import { connectDb } from "./config/mongodb";
-import { corsOptions } from "./config/corsOptions";
-import { passport } from "./config/passport";
+import { Auth, Task, Tag } from "../routes";
+import { connectDb } from "../config/mongodb";
+import { corsOptions } from "../config/corsOptions";
+import { passport } from "../config/passport";
 
 dotenv.config();
 
