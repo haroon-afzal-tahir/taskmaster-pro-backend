@@ -103,5 +103,6 @@
       "es5", "es6", "dom", "dom.iterable"
     ]
   },
-  "exclude": ["tests"]
+  "exclude": ["tests", "dist", "node_modules"],
+  "include": ["./api/*.ts"]
 }
