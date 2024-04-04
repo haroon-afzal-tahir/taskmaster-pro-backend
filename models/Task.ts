@@ -16,11 +16,11 @@ const taskSchema = new mongoose.Schema<ITask, TaskModel>({
 });
 
 taskSchema.statics.getAll = function () {
-  return Task.find({ completed: false }).populate("tag").populate("user");
+  return Task.find().populate("tag").populate("user");
 }
 
 taskSchema.statics.getTasksByTagId = function (tagId: string) {
-  return Task.find({ tag: new Types.ObjectId(tagId), completed: false }).populate("tag").populate("user");
+  return Task.find().populate("tag").populate("user");
 }
 
 taskSchema.set("toJSON", {

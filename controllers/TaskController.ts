@@ -42,7 +42,7 @@ export class TaskController {
     try {
       // Update the status of the task
       const taskId = req.params.id;
-      const { title, dueDate, tag } = req.body;
+      const { title, tag, completed } = req.body;
       
       const task = await Task.findById(taskId);
 
@@ -51,9 +51,8 @@ export class TaskController {
       }
 
       task.title = title;
-      task.dueDate = dueDate;
       task.tag = tag;
-      task.completed = false;
+      task.completed = completed;
 
       await task.save();
       return res.status(200).json({ message: `${task.title} updated successfully`, task });
