@@ -8,10 +8,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const services_1 = require("../services");
 const passport_1 = require("../config/passport");
+const models_1 = require("../models");
+const bcrypt_1 = __importDefault(require("bcrypt"));
 class AuthController {
     static register(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -84,6 +89,12 @@ class AuthController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email, password } = req.body;
+                const user = yield models_1.User.find({ email });
+                if (!user)
+                    return res.status(404).json({ message: "User not found" });
+                if (yield bcrypt_1.default.compare(password, user[0].password)) {
+                    return res.status(400).json({ message: "New password cannot be the same as the old password" });
+                }
                 yield services_1.AuthService.updatePassword(email, password);
                 return res.status(200).json({ message: "Password updated successfully" });
             }

@@ -46,7 +46,6 @@ export class AuthService {
       // Generate OTP of 6 digits
       const otp = Math.floor(100000 + Math.random() * 900000);
 
-      console.log(otp);
       // Send OTP to email
       await EmailLib.sendEmail(email, "OTP for password reset", `Your OTP is ${otp}`);
 

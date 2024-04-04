@@ -3,6 +3,8 @@ import { IUser } from "../types";
 import { AuthService } from "../services";
 import { passport } from '../config/passport';
 import { info } from "winston";
+import { User } from "../models";
+import bcrypt from "bcrypt";
 
 export class AuthController {
   public static async register(req: Request, res: Response) {
@@ -74,6 +76,13 @@ export class AuthController {
   public static async updatePassword(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
+      const user = await User.find({ email });
+      if (!user) return res.status(404).json({ message: "User not found" });
+
+      if (await bcrypt.compare(password, user[0].password)) {
+        return res.status(400).json({ message: "New password cannot be the same as the old password" });
+      }
+
       await AuthService.updatePassword(email, password);
       return res.status(200).json({ message: "Password updated successfully" });
     } catch (error) {

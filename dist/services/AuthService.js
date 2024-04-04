@@ -58,7 +58,6 @@ class AuthService {
             try {
                 // Generate OTP of 6 digits
                 const otp = Math.floor(100000 + Math.random() * 900000);
-                console.log(otp);
                 // Send OTP to email
                 yield email_1.EmailLib.sendEmail(email, "OTP for password reset", `Your OTP is ${otp}`);
                 // Save OTP in database
