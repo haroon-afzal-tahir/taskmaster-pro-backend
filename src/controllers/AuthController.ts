@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { IUser } from "../types";
 import { AuthService } from "../services";
-import { logger } from "../config/winston";
 import { passport } from '../config/passport';
 import { info } from "winston";
 
@@ -10,7 +9,6 @@ export class AuthController {
     try {
       const user = req.body as IUser;
       if (!user || !user.email || !user.password) {
-        logger.error("User data not found");
         return res.status(400).json({ message: "User data not found" });
       }
       const [token, newUser] = await AuthService.register(user);
@@ -28,17 +26,14 @@ export class AuthController {
     try {
       const user = req.body as IUser;
       if (!user || !user.email || !user.password) {
-        logger.error("User data not found");
         return res.status(400).json({ message: "User data not found" });
       }
 
       passport.authenticate("local", { session: false }, (err: { message: any; }, user: IUser & { _id: string; }, info: { message: any; }) => {
         if (err) {
-          logger.error(err.message);
           return res.status(500).json({ message: err.message });
         }
         if (!user) {
-          logger.error(info.message);
           return res.status(401).json({ message: info.message });
         }
 
@@ -94,7 +89,6 @@ export class AuthController {
       req.logout(
         function (err: any) {
           if (err) {
-            logger.error(err.message);
             return res.status(500).json({ message: err.message });
           }
         }

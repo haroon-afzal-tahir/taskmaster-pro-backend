@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const services_1 = require("../services");
-const winston_1 = require("../config/winston");
 const passport_1 = require("../config/passport");
 class AuthController {
     static register(req, res) {
@@ -19,7 +18,6 @@ class AuthController {
             try {
                 const user = req.body;
                 if (!user || !user.email || !user.password) {
-                    winston_1.logger.error("User data not found");
                     return res.status(400).json({ message: "User data not found" });
                 }
                 const [token, newUser] = yield services_1.AuthService.register(user);
@@ -37,16 +35,13 @@ class AuthController {
             try {
                 const user = req.body;
                 if (!user || !user.email || !user.password) {
-                    winston_1.logger.error("User data not found");
                     return res.status(400).json({ message: "User data not found" });
                 }
                 passport_1.passport.authenticate("local", { session: false }, (err, user, info) => {
                     if (err) {
-                        winston_1.logger.error(err.message);
                         return res.status(500).json({ message: err.message });
                     }
                     if (!user) {
-                        winston_1.logger.error(info.message);
                         return res.status(401).json({ message: info.message });
                     }
                     // JWT token
@@ -105,7 +100,6 @@ class AuthController {
                 // passport logout
                 req.logout(function (err) {
                     if (err) {
-                        winston_1.logger.error(err.message);
                         return res.status(500).json({ message: err.message });
                     }
                 });

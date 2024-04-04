@@ -1,6 +1,5 @@
 import nodemailer from 'nodemailer';
 import type { SendMailOptions } from 'nodemailer';
-import { logger } from '../config/winston';
 
 export class EmailLib {
   public static async sendEmail(to: string, subject: string, body: string) {
@@ -29,7 +28,6 @@ export class EmailLib {
       await mailTransport.sendMail(mailOptions);
 
     } catch (error) {
-      logger.error((error as Error).message);
       return;
     }
   }

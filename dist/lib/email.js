@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmailLib = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
-const winston_1 = require("../config/winston");
 class EmailLib {
     static sendEmail(to, subject, body) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -41,7 +40,6 @@ class EmailLib {
                 yield mailTransport.sendMail(mailOptions);
             }
             catch (error) {
-                winston_1.logger.error(error.message);
                 return;
             }
         });
