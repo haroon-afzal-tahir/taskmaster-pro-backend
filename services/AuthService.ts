@@ -87,7 +87,6 @@ export class AuthService {
       // Update password
       user.setPassword(hashedPassword, (err: { message: string | undefined; }, user: { save: () => void; }) => {
         if (err) throw new Error(err.message);
-        console.log(user);
         user.save();
       })
     } catch (error) {
