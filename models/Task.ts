@@ -1,9 +1,9 @@
-import mongoose, { Model, Schema } from "mongoose";
-import { ObjectId } from "mongoose";
+import mongoose, { Model, Schema, Types } from "mongoose";
 import { ITask } from "../types";
 
 interface TaskModel extends Model<ITask> {
   getAll(): Promise<ITask[]>;
+  getTasksByTagId(tagId: string): Promise<ITask[]>;
 }
 
 const taskSchema = new mongoose.Schema<ITask, TaskModel>({
@@ -16,7 +16,11 @@ const taskSchema = new mongoose.Schema<ITask, TaskModel>({
 });
 
 taskSchema.statics.getAll = function () {
-  return Task.find().populate("tag").populate("user");
+  return Task.find({ completed: false }).populate("tag").populate("user");
+}
+
+taskSchema.statics.getTasksByTagId = function (tagId: string) {
+  return Task.find({ tag: new Types.ObjectId(tagId), completed: false }).populate("tag").populate("user");
 }
 
 taskSchema.set("toJSON", {
