@@ -1,6 +1,10 @@
 const ALLOWED_ORIGINS = [
-  "http://localhost:5173",
+  "https://taskmaster-pro-swart.vercel.app",
 ]
+
+if (process.env.NODE_ENV === "development") {
+  ALLOWED_ORIGINS.push("http://localhost:5173")
+}
 
 export const corsOptions = {
   origin: function (origin: any, callback: any) {
