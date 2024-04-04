@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { Validators } from "../utils/validator";
 import bcrypt from "bcrypt";
 import { EmailLib } from "../lib/email";
+import { passport } from "../config/passport";
 
 export class AuthService {
   public static async register(payload: IUser) {
@@ -18,20 +19,23 @@ export class AuthService {
       const hashedPassword = await bcrypt.hash(payload.password, 10);
       payload.password = hashedPassword;
 
+      let token = "";
       // User creation
-      const newUser = new User(payload);
-      await newUser.save();
-
-      // JWT token
-      const token = jwt.sign({
-        email: payload.email,
-        name: payload.name,
-        username: payload.username,
-        id: newUser._id,
-      }, process.env.JWT_SECRET as string, { expiresIn: "1d" });
+      await User.register(new User(payload), payload.password, (err, user) => {
+        if (err) {
+          throw new Error(err.message);
+        } else {
+          // JWT token
+          token = jwt.sign({
+            email: payload.email,
+            name: payload.name,
+            username: payload.username,
+            id: user._id,
+          }, process.env.JWT_SECRET as string, { expiresIn: "1d" });
+        }
+      });
 
       return token;
-
     } catch (error) {
       throw new Error((error as Error).message);
     }
@@ -41,9 +45,22 @@ export class AuthService {
     try {
       const { email, password } = payload;
 
-      const user = await User.findOne({ email});
+      if (!email || !password) throw new Error("Invalid credentials");
+
+      const user = await User.findOne({ email });
       
       if (!user) throw new Error("User not found");
+
+      const id_token = passport.authenticate("local", (err: { message: string | undefined; }, user: { _id: string; username: string; email: string }, info: any) => {
+        if (err) {
+          throw new Error(err.message);
+        }
+        if (!user) {
+          throw new Error("Invalid credentials");
+        }
+        const token = jwt.sign({ userId: user._id, username: user.username, email: user.email }, process.env.JWT_SECRET!, { expiresIn: "24h" });
+        return token;
+      })
 
       const isMatch = await bcrypt.compare(password, user.password);
 

@@ -30,7 +30,7 @@ export class AuthController {
       // Send token in response cookie
       res.cookie("id_token", token, { httpOnly: true, sameSite: 'none', secure: true, });
 
-      return res.status(200).json({ message: "User registered successfully", token });
+      return res.status(200).json({ message: "User login successfully", token });
     } catch (error) {
       return res.status(500).json({ message: (error as Error).message });
     }

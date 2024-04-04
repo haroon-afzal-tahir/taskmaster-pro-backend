@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import passportLocalMongoose from "passport-local-mongoose";
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -12,8 +13,10 @@ userSchema.set("toJSON", {
   transform: (doc, ret) => {
     delete ret.__v;
     return ret;
-  }  
+  }
 });
+
+userSchema.plugin(passportLocalMongoose);
 
 const User = mongoose.model("User", userSchema);
 
