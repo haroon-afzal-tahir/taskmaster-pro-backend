@@ -35,7 +35,7 @@ export class AuthService {
         name: newUser.name,
       }, process.env.JWT_SECRET!, { expiresIn: "1d" });
 
-      return token;
+      return [token, newUser];
     } catch (error) {
       throw new Error((error as Error).message);
     }
